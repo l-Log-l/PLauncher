@@ -1,0 +1,986 @@
+:root {
+    /* Core theme colors */
+    --primary: #4a4e69;
+    --secondary: #22223b;
+    --accent: #9a8c98;
+    --text: #f2e9e4;
+
+    /* UI elements */
+    --background-overlay: rgba(255, 255, 255, 0.1);
+    --error-color: rgba(255, 0, 0, 0.2);
+    --success-color: rgba(0, 255, 0, 0.1);
+}
+
+/* Base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    color: var(--text);
+    -webkit-app-region: drag;
+}
+
+input,
+button {
+    -webkit-app-region: no-drag;
+    outline-color: var(--text);
+}
+
+.launcher-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.window-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    z-index: 100;
+    -webkit-app-region: no-drag;
+}
+
+.control {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 10px;
+    background-color: var(--background-overlay);
+    color: var(--text);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.close:hover {
+    background-color: var(--error-color);
+    transform: scale(1.1);
+}
+
+.content-wrapper {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    transition: margin-right 0.3s ease;
+}
+
+.content-wrapper.debug-active {
+    margin-right: 400px;
+}
+
+.welcome-section {
+    text-align: center;
+    margin-bottom: 30px;
+    animation: fadeIn 1s ease;
+    position: relative;
+    z-index: 99; /* Поднимаем над другими элементами */
+}
+
+.welcome-section h1 {
+    font-size: 3rem;
+    color: var(--text);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    user-select: none;
+    -webkit-app-region: no-drag;
+}
+
+.welcome-section h1:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.settings-section {
+    width: 100%;
+    max-width: 500px;
+    background-color: rgba(0, 0, 0, 0.3);
+    padding: 30px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    animation: slideUp 0.7s ease;
+    -webkit-app-region: no-drag;
+}
+
+.setting-group {
+    margin-bottom: 20px;
+}
+
+.setting-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--accent);
+}
+
+.setting-group input,
+.directory-selector {
+    width: 100%;
+    padding: 10px;
+    background-color: var(--background-overlay);
+    border: none;
+    border-radius: 5px;
+    color: var(--text);
+}
+
+.directory-selector {
+    display: flex;
+    align-items: center;
+}
+
+.directory-selector input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+
+.directory-selector button {
+    background-color: var(--accent);
+    color: var(--secondary);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.action-buttons button {
+    flex: 1;
+    max-width: 200px;
+}
+
+.action-buttons button {
+    flex-grow: 1;
+    margin: 0 10px;
+    padding: 15px;
+    background-color: var(--primary);
+    color: var(--text);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-buttons button:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+button:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+            circle at top right,
+            rgba(74, 78, 105, 0.3),
+            transparent 50%
+        ),
+        radial-gradient(
+            circle at bottom left,
+            rgba(34, 34, 59, 0.3),
+            transparent 50%
+        );
+    z-index: 1;
+    pointer-events: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#progress-container {
+    margin-top: 15px;
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.progress-area {
+    max-height: 200px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+}
+
+.progress-message {
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.progress-time {
+    color: var(--accent);
+    margin-right: 10px;
+    font-size: 0.8em;
+    opacity: 0.7;
+}
+
+.progress-text {
+    flex-grow: 1;
+}
+
+.progress-info {
+    background-color: rgba(74, 78, 105, 0.3);
+}
+.progress-error {
+    background-color: var(--error-color);
+    color: #ff6b6b;
+}
+.progress-success {
+    background-color: var(--success-color);
+    color: #4ecdc4;
+}
+.progress-progress {
+    background-color: rgba(74, 78, 105, 0.5);
+}
+
+.ram-selector {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.ram-value {
+    min-width: 100px;
+    padding: 5px 10px;
+    background: var(--background-overlay);
+    border-radius: 5px;
+    text-align: center;
+}
+
+input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    background: var(--background-overlay);
+    border-radius: 4px;
+    outline: none;
+    position: relative;
+    margin: 6px 0;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: -6px;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--text);
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+@keyframes shake {
+    0%, 100% { 
+        transform: translate(0, 0) rotate(0deg) scale(1); 
+    }
+    10% { 
+        transform: translate(-1px, -1px) rotate(-1deg) scale(0.98); 
+    }
+    20% { 
+        transform: translate(1px, 0px) rotate(1deg) scale(0.99); 
+    }
+    30% { 
+        transform: translate(-2px, 1px) rotate(0deg) scale(0.98); 
+    }
+    40% { 
+        transform: translate(1px, -1px) rotate(1deg) scale(0.99); 
+    }
+    50% { 
+        transform: translate(-1px, 1px) rotate(-0.5deg) scale(0.98); 
+    }
+    60% { 
+        transform: translate(1px, 1px) rotate(0deg) scale(0.99); 
+    }
+    70% { 
+        transform: translate(-1px, -0.5px) rotate(0.5deg) scale(0.99); 
+    }
+    80% { 
+        transform: translate(0.5px, 1px) rotate(-0.5deg) scale(1); 
+    }
+    90% { 
+        transform: translate(-0.5px, 0px) rotate(0.2deg) scale(1); 
+    }
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(34, 34, 59, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 998;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-group {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: linear-gradient(145deg, 
+        rgba(74, 78, 105, 0.95),
+        rgba(34, 34, 59, 0.95));
+    padding: 35px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 600px;
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(154, 140, 152, 0.15);
+    border: 1px solid rgba(242, 233, 228, 0.1);
+}
+
+.modal-group.active {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.modal-close {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(74, 78, 105, 0.95);
+    border: 2px solid rgba(242, 233, 228, 0.2);
+    border-radius: 50%;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close:hover {
+    background: var(--primary);
+    transform: rotate(180deg) scale(1.1);
+    border-color: var(--accent);
+}
+
+/* Modal content styles */
+.modal-group .setting-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: rgba(34, 34, 59, 0.5);
+    border-radius: 12px;
+    border: 1px solid rgba(154, 140, 152, 0.1);
+    transition: all 0.3s ease;
+}
+
+.modal-group .setting-group:hover {
+    background: rgba(34, 34, 59, 0.7);
+    border-color: rgba(154, 140, 152, 0.2);
+    transform: translateY(-2px);
+}
+
+.modal-group .setting-group label {
+    margin-bottom: 0;
+    margin-right: 20px;
+    flex-shrink: 0;
+    font-size: 1.1rem;
+    color: var(--text);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.modal-group .ram-selector {
+    flex: 1;
+    padding: 0;
+    gap: 15px;
+}
+
+.modal-group .directory-selector {
+    flex: 1;
+    margin: 0;
+    background: rgba(74, 78, 105, 0.3);
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.modal-group input[type="checkbox"] {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    accent-color: var(--accent);
+    border-radius: 6px;
+}
+
+.modal-group .directory-selector button {
+    padding: 10px 15px;
+    white-space: nowrap;
+    background: var(--accent);
+    color: var(--secondary);
+    border-radius: 8px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.modal-group .directory-selector button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: var(--text);
+}
+
+.modal-group .ram-value {
+    min-width: 90px;
+    padding: 8px 12px;
+    background: rgba(74, 78, 105, 0.3);
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    color: var(--text);
+    border: 1px solid rgba(154, 140, 152, 0.2);
+}
+
+.modal-group input[type="range"] {
+    flex: 1;
+    margin: 0 10px;
+    height: 10px;
+    background: rgba(74, 78, 105, 0.3);
+}
+
+.modal-group input[type="range"]::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+    background: var(--accent);
+    border: 2px solid var(--text);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-group input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--text);
+}
+
+/* Add smooth transition for inputs */
+.modal-group input {
+    transition: all 0.3s ease;
+}
+
+/* Add fancy scrollbar for modal content if needed */
+.modal-group {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) rgba(34, 34, 59, 0.5);
+}
+
+.modal-group::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-group::-webkit-scrollbar-track {
+    background: rgba(34, 34, 59, 0.5);
+    border-radius: 4px;
+}
+
+.modal-group::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+}
+
+/* Footer styles */
+.launcher-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    padding: 8px 15px;
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    font-size: 12px;
+    color: var(--text);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.footer-label {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+.server-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: gray;
+}
+
+.status-indicator.online {
+    background-color: #4CAF50;
+    box-shadow: 0 0 5px #4CAF50;
+}
+
+.status-indicator.offline {
+    background-color: #f44336;
+    box-shadow: 0 0 5px #f44336;
+}
+
+.status-text {
+    font-size: 12px;
+}
+
+/* New button styles */
+.directory-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.directory-buttons button {
+    flex: 1;
+    padding: 10px 15px;
+    background: var(--accent);
+    color: var(--secondary);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+}
+
+.directory-buttons button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    background: var(--text);
+}
+
+/* Debug Sidebar Styles */
+.debug-sidebar {
+    position: fixed;
+    right: -400px;
+    top: 0;
+    width: 400px;
+    height: 100vh;
+    background: rgba(34, 34, 59, 0.95);
+    border-left: 1px solid var(--accent);
+    backdrop-filter: blur(10px);
+    transition: right 0.3s ease;
+    z-index: 997;
+    padding: 20px;
+    box-shadow: -5px 0 15px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+}
+
+.debug-sidebar.active {
+    right: 0;
+}
+
+.debug-sidebar .toggle-button {
+    position: absolute;
+    left: -30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 60px;
+    background: rgba(34, 34, 59, 0.95);
+    border: none;
+    border-radius: 5px 0 0 5px;
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.debug-sidebar .toggle-button:hover {
+    background: var(--primary);
+}
+
+.debug-sidebar.collapsed {
+    right: -370px;
+}
+
+.debug-header {
+    font-size: 1.2em;
+    color: var(--accent);
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--accent);
+    margin-bottom: 15px;
+}
+
+.debug-content {
+    flex: 1;
+    overflow-y: scroll;
+    padding-right: 10px;
+    margin-right: -10px; /* Компенсируем padding */
+    height: calc(100vh - 120px);
+    -webkit-app-region: no-drag;
+}
+
+.debug-section {
+    margin-bottom: 20px;
+    flex-shrink: 0;
+}
+
+.debug-section:last-child {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+    margin-bottom: 0;
+}
+
+.debug-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(154, 140, 152, 0.1);
+    -webkit-app-region: no-drag;
+}
+
+.debug-item span:first-child {
+    color: var(--accent);
+    font-weight: bold;
+    min-width: 120px;
+}
+
+.debug-item span:last-child {
+    color: var(--text);
+    word-break: break-word;
+    text-align: right;
+    flex: 1;
+}
+
+.debug-log {
+    flex: 1;
+    min-height: 200px;
+    max-height: 400px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 5px;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    color: var(--text);
+    border: 1px solid rgba(154, 140, 152, 0.2);
+    overflow-y: scroll;
+    -webkit-app-region: no-drag;
+}
+
+.debug-log div {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(154, 140, 152, 0.1);
+    line-height: 1.4;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    user-select: text;
+}
+
+/* Общие стили для скроллбаров */
+.debug-content::-webkit-scrollbar,
+.debug-log::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.debug-content::-webkit-scrollbar-track,
+.debug-log::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    margin: 2px;
+}
+
+.debug-content::-webkit-scrollbar-thumb,
+.debug-log::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.debug-content::-webkit-scrollbar-thumb:hover,
+.debug-log::-webkit-scrollbar-thumb:hover {
+    background: var(--text);
+}
+
+/* Стили для скроллбара */
+.debug-content::-webkit-scrollbar,
+.debug-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+.debug-content::-webkit-scrollbar-track,
+.debug-log::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.debug-content::-webkit-scrollbar-thumb,
+.debug-log::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.debug-content::-webkit-scrollbar-thumb:hover,
+.debug-log::-webkit-scrollbar-thumb:hover {
+    background: var(--text);
+}
+
+.debug-log div {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(154, 140, 152, 0.1);
+    line-height: 1.4;
+    word-wrap: break-word;
+    user-select: text; /* Позволяет выделять текст */
+    cursor: text;
+}
+
+/* Стили для записей в логе */
+.debug-log div {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(154, 140, 152, 0.1);
+    line-height: 1.4;
+    word-wrap: break-word;
+    user-select: text; /* Позволяет выделять текст */
+    cursor: text;
+}
+
+/* Стили для скроллбара в debug log */
+.debug-log::-webkit-scrollbar {
+    width: 8px;
+}
+
+.debug-log::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.debug-log::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 4px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.debug-log::-webkit-scrollbar-thumb:hover {
+    background: var(--text);
+}
+
+.debug-log div {
+    padding: 4px 0;
+    border-bottom: 1px solid rgba(154, 140, 152, 0.1);
+    line-height: 1.4;
+    word-wrap: break-word;
+}
+
+.debug-log div:last-child {
+    border-bottom: none;
+}
+
+.setting-group-non img {
+    max-width: 100%; /* Делаем изображение адаптивным по ширине */
+    max-height: 150px; /* Ограничиваем высоту изображения */
+    width: auto;
+    height: auto;
+    display: block;
+    margin: 0 auto; /* Центрируем изображение */
+
+    /* Плавный переход для эффекта наведения */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+    /* Добавляем тень для глубины */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2), 0 6px 20px rgba(0, 0, 0, 0.1);
+    border-radius: 10px; /* Сглаженные углы */
+}
+
+.setting-group-non img:hover {
+    /* Эффект увеличения при наведении */
+    transform: scale(1.05);
+    
+    /* Увеличение тени при наведении для динамичности */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.credits-section {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.1);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    z-index: 1001; /* Должен быть выше, чем z-index модального окна */
+}
+
+.credits-header {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #666;
+}
+
+.credits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.credit-item {
+    color: #444;
+}
+
+.update-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.update-modal.active {
+    display: flex;
+}
+
+.update-modal-content {
+    background-color: #1a1a2e;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    text-align: center;
+    color: white;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: #2a2a3e;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: #4CAF50;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.wiki-button {
+    position: fixed;
+    left: 20px;
+    bottom: 60px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    -webkit-app-region: no-drag;
+}
+
+.wiki-button:hover {
+    transform: scale(1.1);
+    background: var(--accent);
+}

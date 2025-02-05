@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SMP Launcher</title>
+        <link rel="stylesheet" href="styles.css" />
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    </head>
+    <body>
+        <div class="launcher-container">
+            <div class="wiki-button" id="open-wiki">
+                Вики
+            </div>
+            <div class="window-controls">
+                <div class="control minimize" data-action="minimize">—</div>
+                <div class="control maximize" data-action="maximize">□</div>
+                <div class="control close" data-action="close">✕</div>
+            </div>
+            <div class="credits-section">
+                <div class="credits-header">Разработчики</div>
+                <div class="credits-list">
+                    <div class="credit-item">! Деловая Котейка (@art3m4ik3)</div>
+                    <div class="credit-item">🦊Mr Fox (@maksorr2)</div>
+                    <div class="credit-item">!Log (@__log__)</div>
+                </div>
+            </div>
+            <div class="content-wrapper">
+                <div class="welcome-section">
+                    <h1 id="welcome-title" style="cursor: pointer; -webkit-app-region: no-drag;">SMP Launcher</h1>
+                </div>
+                <div class="settings-section">
+                    <div class="setting-group">
+                        <label>Никнейм</label>
+                        <input
+                            type="text"
+                            id="username-input"
+                            placeholder="Введите ваш никнейм ely.by"
+                        />
+                        
+                    </div>
+                    <div class="setting-group">
+                        <label>Пароль</label>
+                        <input
+                            type="password"
+                            id="password-input"
+                            placeholder="Введите ваш пароль ely.by"
+                        />
+                        
+                    </div>
+                    <div class="action-buttons">
+                        <button id="launch-game">Запустить игру</button>
+                        <button id="modal-settings">Открыть настройки</button>
+                    </div>
+                </div>
+                <!-- Modal content -->
+                <div class="modal-overlay"></div>
+                <div class="modal-group">
+                    <!-- Кнопка закрытия будет добавлена через JavaScript -->
+                    <div class="setting-group">
+                        <label>Выделенное ОЗУ (МБ)</label>
+                        <div class="ram-selector">
+                            <input
+                                type="range"
+                                id="ram-input"
+                                min="2048"
+                                max="16384"
+                                step="1024"
+                                value="2048"
+                            />
+                            <div class="ram-value">
+                                <span id="ram-display">2048 МБ</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label>Игровая папка</label>
+                        <div class="directory-selector">
+                            <input
+                                type="text"
+                                id="directory-input"
+                                readonly
+                                placeholder="Введите путь до игровой папки"
+                            />
+                            <button id="select-directory">Обзор</button>
+                        </div>
+                    </div>
+                    <div class="setting-group">
+                        <label>Режим отладки</label>
+                        <input type="checkbox" id="debug-input" />
+                    </div>
+                    <div class="setting-group">
+                        <div class="directory-buttons">
+                            <button id="open-minecraft-dir">Открыть папку Minecraft</button>
+                            <button id="open-launcher-dir">Открыть логи лаунчера</button>
+                        </div>
+                    </div>
+                    <div class="setting-group-non">
+                        <img src="Banner_mini.png" alt="Octant Host" id="banner-img" style="cursor: pointer;" />
+                    </div>
+                  
+                </div>
+            </div>
+            <!-- Add debug sidebar -->
+            <div id="debug-sidebar" class="debug-sidebar">
+                <button class="toggle-button" id="toggle-debug-sidebar">›</button>
+                <div class="debug-header">Debug Info</div>
+                <div class="debug-content">
+                    <div class="debug-section">
+                        <h3>System</h3>
+                        <div class="debug-item">
+                            <span>Java Path:</span>
+                            <span id="debug-java-path">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Game Directory:</span>
+                            <span id="debug-game-dir">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>OS:</span>
+                            <span id="debug-os">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>OS Version:</span>
+                            <span id="debug-os-version">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Architecture:</span>
+                            <span id="debug-os-arch">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Computer Name:</span>
+                            <span id="debug-hostname">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>CPU:</span>
+                            <span id="debug-cpu">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Total RAM:</span>
+                            <span id="debug-total-ram">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Free RAM:</span>
+                            <span id="debug-free-ram">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>Launcher</h3>
+                        <div class="debug-item">
+                            <span>Version:</span>
+                            <span id="debug-launcher-version">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Logs Directory:</span>
+                            <span id="debug-logs-dir">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>Live Log</h3>
+                        <div id="debug-live-log" class="debug-log"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="launcher-footer">
+                <div class="footer-item">
+                    <span class="footer-label">Java:</span>
+                    <span id="java-status">Не определено</span>
+                </div>
+                <div class="footer-item">
+                    <span class="footer-label">Minecraft:</span>
+                    <span id="minecraft-status">Не запущен</span>
+                </div>
+                <div class="footer-item">
+                    <span class="footer-label">Версия:</span>
+                    <span id="version-display">Загрузка...</span>
+                </div>
+                <div class="footer-item">
+                    <div class="server-status">
+                        <span class="footer-label">SMP Planet:</span>
+                        <div class="status-indicator" id="smp-status"></div>
+                        <span class="status-text" id="smp-status-text">Проверка...</span>
+                    </div>
+                </div>
+                <div class="footer-item">
+                    <div class="server-status">
+                        <span class="footer-label">Octant Host:</span>
+                        <div class="status-indicator" id="octant-status"></div>
+                        <span class="status-text" id="octant-status-text">Проверка...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Add update modal before closing body tag -->
+        <div id="update-modal" class="update-modal">
+            <div class="update-modal-content">
+                <h2>Обновление лаунчера</h2>
+                <p id="update-status-text">Проверка обновлений...</p>
+                <div id="update-progress-bar" class="progress-bar">
+                    <div id="update-progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+        <script src="renderer.js"></script>
+        <script src="button-movement.js"></script>
+    </body>
+</html>

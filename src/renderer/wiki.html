@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SMP Planet Wiki</title>
+    <style>
+        :root {
+            --primary: #4a4e69;
+            --secondary: #22223b;
+            --accent: #9a8c98;
+            --text: #f2e9e4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: var(--text);
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .wiki-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .wiki-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .wiki-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .wiki-section h2 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+
+        .wiki-section h3 {
+            color: var(--accent);
+            margin: 15px 0;
+        }
+
+        .wiki-section p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .wiki-section ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .wiki-section li {
+            margin: 5px 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: var(--primary);
+            border: none;
+            border-radius: 5px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            background: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+    <div class="window-controls">
+        <div class="control minimize" data-action="minimize">—</div>
+        <div class="control maximize" data-action="maximize">□</div>
+        <div class="control close" data-action="close">✕</div>
+    </div>
+    <div class="wiki-container">
+        <div class="wiki-header">
+            <h1>SMP Planet Wiki</h1>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="launcher">Лаунчер</button>
+            <button class="tab" data-tab="modpack">Сборка</button>
+            <button class="tab" data-tab="server">Сервер</button>
+        </div>
+
+        <div class="tab-content active" id="launcher">
+            <div class="wiki-section">
+                <h2>О лаунчере</h2>
+                <p>SMP Launcher - это специально разработанный лаунчер для игры на сервере SMP Planet.</p>
+                <h3>Основные функции</h3>
+                <ul>
+                    <li>Автоматическая установка модов</li>
+                    <li>Простой и удобный интерфейс</li>
+                    <li>Встроенная система обновлений</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tab-content" id="modpack">
+            <div class="wiki-section">
+                <h2>О сборке</h2>
+                <p>Наша сборка модов создана для оптимального баланса производительности и функциональности.</p>
+                <h3>Список основных модов</h3>
+                <ul>
+                    <li>Create</li>
+                    <li>Не дописано...</li>
+                    <li>Пожалуста подождите</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="tab-content" id="server">
+            <div class="wiki-section">
+                <h2>О сервере</h2>
+                <p>SMP Planet - это технический сервер с упором на создание автоматизаций и мегапостроек.</p>
+                <h3>Правила сервера</h3>
+                <ul>
+                    <li>Не дописано...</li>
+                    <li>Пожалуста подождите</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script src="wiki.js"></script>
+</body>
+</html>
