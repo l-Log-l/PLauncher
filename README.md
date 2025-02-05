@@ -1,6 +1,15 @@
 # SMP Launcher
 
-## Install depencies
+## Initial setup
+
+Rename template file to package.json:
+```bash
+mv package.json-template package.json   # For Linux/MacOS
+# OR
+ren "package.json-template" "package.json"   # For Windows
+```
+
+## Install dependencies
 
 ```
 bun i
