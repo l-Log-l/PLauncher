@@ -169,4 +169,3 @@ Thumbs.db
 *.pem
 *.lockb
 *.json
-src/config/config.js
