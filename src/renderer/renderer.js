@@ -2,7 +2,7 @@ let CONFIG; // Глобальная переменная для конфигов
 
 document.getElementById("banner-img").addEventListener("click", function() {
     // Отправляем запрос на главный процесс для открытия внешнего браузера
-    window.electronAPI.openExternalBrowser(CONFIG.EXTERNAL.OCTANT_SITE);
+    window.electronAPI.openExternalBrowser(CONFIG.EXTERNAL.URLS.SUNDER);
 });
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -395,21 +395,21 @@ document.addEventListener("DOMContentLoaded", async () => {
             smpText.textContent = 'Оффлайн';
         }
 
-        const octantIndicator = document.getElementById('octant-status');
-        const octantText = document.getElementById('octant-status-text');
+        const sunderIndicator = document.getElementById('sunder-status');
+        const sunderText = document.getElementById('sunder-status-text');
 
         try {
-            const octantResponse = await window.electronAPI.checkServerStatus(CONFIG.SERVERS.HOSTING.HOST, true);
-            if (octantResponse === true) {
-                octantIndicator.className = 'status-indicator online';
-                octantText.textContent = 'Онлайн';
+            const sunderResponse = await window.electronAPI.checkServerStatus(CONFIG.SERVERS.HOSTING.HOST, true);
+            if (sunderResponse === true) {
+                sunderIndicator.className = 'status-indicator online';
+                sunderText.textContent = 'Онлайн';
             } else {
-                octantIndicator.className = 'status-indicator offline';
-                octantText.textContent = 'Оффлайн';
+                sunderIndicator.className = 'status-indicator offline';
+                sunderText.textContent = 'Оффлайн';
             }
         } catch (error) {
-            octantIndicator.className = 'status-indicator offline';
-            octantText.textContent = 'Оффлайн';
+            sunderIndicator.className = 'status-indicator offline';
+            sunderText.textContent = 'Оффлайн';
         }
     }
 

@@ -12,19 +12,19 @@ export const CONFIG = {
         UPDATE: {
             HOST: '178.236.253.2',
             PORT: 25210,
-            URL: 'http://178.236.253.2:25210',
+            URL: 'http://node1.sunder.su:25895',
             CHECK_INTERVAL: 3600000 // 1 час
         },
         GAME: {
             HOST: 'smp-planet.fun',
-            API: 'http://178.236.253.2:25210',  // Вернули как было
+            API: 'http://node1.sunder.su:25895',  // Вернули как было
             STATUS_CHECK_INTERVAL: 30000 // 30 секунд
         },
         HOSTING: {
-            HOST: '178.236.253.2',
+            HOST: '89.34.219.87',
             PORT: 8443,
-            URL: 'https://178.236.253.2:8443',
-            WEB: 'octant.pro',
+            URL: 'https://89.34.219.87:8443',
+            WEB: 'sunder.su',
             CHECK_TIMEOUT: 5000
         }
     },
@@ -129,7 +129,7 @@ export const CONFIG = {
 
     EXTERNAL: {
         URLS: {
-            OCTANT: 'https://octant.pro',
+            SUNDER: 'https://sunder.su/aff/LOG',
             AUTHLIB: 'https://github.com/yushijinhun/authlib-injector/releases/download/v1.2.5/authlib-injector-1.2.5.jar',
             FABRIC_META: 'https://meta.fabricmc.net/v2/versions/loader'
         }
