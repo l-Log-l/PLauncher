@@ -47,7 +47,7 @@
                         
                     </div>
                     <div class="action-buttons">
-                        <button id="launch-game">Запустить игру</button>
+                        <button id="launch-game" class="launch-button">Запустить игру</button>
                         <button id="modal-settings">Открыть настройки</button>
                     </div>
                 </div>
@@ -160,6 +160,16 @@
                     </div>
                 </div>
             </div>
+            <div class="version-info-corner">
+                <div class="version-item">
+                    <span class="label">Launcher:</span>
+                    <span id="version-display">Загрузка...</span>
+                </div>
+                <div class="version-item">
+                    <span class="label">Java:</span>
+                    <span id="java-status">Не определено</span>
+                </div>
+            </div>
             <div class="launcher-footer">
                 <div class="footer-item">
                     <span class="footer-label">Java:</span>
@@ -169,22 +179,33 @@
                     <span class="footer-label">Minecraft:</span>
                     <span id="minecraft-status">Не запущен</span>
                 </div>
-                <div class="footer-item">
+                <div class="footer-item version-info">
                     <span class="footer-label">Версия:</span>
                     <span id="version-display">Загрузка...</span>
+                    <span class="version-status" id="version-status-indicator"></span>
                 </div>
                 <div class="footer-item">
                     <div class="server-status">
-                        <span class="footer-label">SMP Planet:</span>
+                        <span class="footer-label">smp-planet.fun:</span>
                         <div class="status-indicator" id="smp-status"></div>
                         <span class="status-text" id="smp-status-text">Проверка...</span>
+                        <span class="ping-text" id="smp-ping"></span>
                     </div>
                 </div>
                 <div class="footer-item">
                     <div class="server-status">
-                        <span class="footer-label">Sunder Host:</span>
+                        <span class="footer-label">sunder.pro:</span>
                         <div class="status-indicator" id="sunder-status"></div>
                         <span class="status-text" id="sunder-status-text">Проверка...</span>
+                        <span class="ping-text" id="sunder-ping"></span>
+                    </div>
+                </div>
+                <div class="footer-item">
+                    <div class="server-status">
+                        <span class="footer-label">ely.by:</span>
+                        <div class="status-indicator" id="ely-status"></div>
+                        <span class="status-text" id="ely-status-text">Проверка...</span>
+                        <span class="ping-text" id="ely-ping"></span>
                     </div>
                 </div>
             </div>

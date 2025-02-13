@@ -14,7 +14,7 @@ import crypto, { randomUUID } from "crypto";
 import axios from "axios";
 import fs_sync from "fs";
 import path from "path";
-import os from "os";
+import os, { platform } from "os";
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { dirname } from 'path';
@@ -235,11 +235,11 @@ async function waitForJavaInstallation(timeout = 60000) {
         }
 
         // Then check common installation directories
-        const checkPaths = os.platform() === 'win32' ? [
+        const checkPaths = [
             "C:\\Program Files\\Java\\jdk-21\\bin\\javaw.exe",
             "C:\\Program Files\\Java\\jdk-23\\bin\\javaw.exe",
             "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath\\javaw.exe"
-        ] : [];
+        ];
 
         for (const javaPath of checkPaths) {
             if (fs_sync.existsSync(javaPath)) {
@@ -263,27 +263,18 @@ async function getBestJavaPath() {
         version: 0
     };
 
-    // Check common installation directories first
-    const checkPaths = os.platform() === 'win32' ? [
+    const checkPaths = [
         "C:\\Program Files\\Java",
         "C:\\Program Files (x86)\\Java",
         "C:\\Program Files\\Common Files\\Oracle\\Java\\javapath"
-    ] : [
-        "/usr/lib/jvm",
-        "/Library/Java/JavaVirtualMachines"
     ];
 
-    // Check installation directories
+    // Проверяем директории установки
     for (const basePath of checkPaths) {
         if (fs_sync.existsSync(basePath)) {
             const dirs = await fs.readdir(basePath);
             for (const dir of dirs) {
-                const binPath = path.join(
-                    basePath, 
-                    dir, 
-                    dir.includes('javapath') ? '' : 'bin', 
-                    os.platform() === "win32" ? "javaw.exe" : "java"
-                );
+                const binPath = path.join(basePath, dir, 'bin', 'javaw.exe');
                 
                 if (fs_sync.existsSync(binPath)) {
                     const version = await getJavaVersionFromCommand(binPath);
@@ -325,15 +316,15 @@ async function ensureJava(gameDirectory) {
 
         // Continue with Java installation if no suitable version found
         logger.info('No suitable Java found, proceeding with installation');
-        const installerUrl = JAVA_URLS[os.platform()];
+        const installerUrl = JAVA_URLS.win32;
         if (!installerUrl) {
-            logger.error('Unsupported platform for Java installation: %s', os.platform());
-            throw new Error("Unsupported platform for Java installation");
+            logger.error('Failed to get Java installer URL');
+            throw new Error("Failed to get Java installer URL");
         }
 
         const installerPath = path.join(
             os.tmpdir(),
-            `java21_installer${path.extname(installerUrl)}`
+            `java21_installer.exe`
         );
 
         logger.info('Downloading Java installer from: %s', installerUrl);
@@ -344,25 +335,22 @@ async function ensureJava(gameDirectory) {
         await fs.writeFile(installerPath, response.data);
 
         logger.info("Installing Java...");
-        if (os.platform() === "win32") {
-            await execPromise(`"${installerPath}" /s INSTALL_SILENT=1 STATIC=0 AUTO_UPDATE=0`);
-            
-            // Wait longer for installation to complete
-            logger.info("Waiting for Java installation to complete...");
-            const javaPath = await waitForJavaInstallation(120000); // 2 minutes timeout
-            if (javaPath) {
-                logger.info("Java installation completed, found at: %s", javaPath);
-                try {
-                    await fs.unlink(installerPath);
-                } catch (e) {
-                    logger.error("Error removing installer: %s", e);
-                }
-                mainWindow.webContents.send('java-install-complete'); // Emit event
-                return javaPath;
+        await execPromise(`"${installerPath}" /s INSTALL_SILENT=1 STATIC=0 AUTO_UPDATE=0`);
+        
+        // Wait longer for installation to complete
+        logger.info("Waiting for Java installation to complete...");
+        const newJavaPath = await waitForJavaInstallation(120000); // 2 minutes timeout
+        if (newJavaPath) {
+            logger.info("Java installation completed, found at: %s", newJavaPath);
+            try {
+                await fs.unlink(installerPath);
+            } catch (e) {
+                logger.error("Error removing installer: %s", e);
             }
-            throw new Error("Java installation completed but executable not found");
+            mainWindow.webContents.send('java-install-complete');
+            return newJavaPath;
         }
-        // ...existing code for other platforms...
+        throw new Error("Java installation completed but executable not found");
 
     } catch (error) {
         logger.error('Java installation failed. Error: %s', error.message);
@@ -747,6 +735,27 @@ async function isSafeModeAvailable(gameDirectory) {
     }
 }
 
+function initializeCacheDirectories() {
+    const userDataPath = app.getPath('userData');
+    const cacheDir = path.join(userDataPath, 'Cache');
+    const gpuCacheDir = path.join(userDataPath, 'GPUCache');
+
+    // Create directories with proper permissions
+    [cacheDir, gpuCacheDir].forEach(dir => {
+        if (!fs_sync.existsSync(dir)) {
+            try {
+                fs_sync.mkdirSync(dir, { recursive: true, mode: 0o755 });
+            } catch (error) {
+                logger.error('Failed to create cache directory %s: %s', dir, error);
+            }
+        }
+    });
+
+    // Set proper cache path in app
+    app.setPath('sessionData', userDataPath);
+    app.setPath('userCache', cacheDir);
+}
+
 function createWindow() {
     const mainWindow = new BrowserWindow({
         width: CONFIG.WINDOW.MAIN.WIDTH,
@@ -759,7 +768,8 @@ function createWindow() {
             preload: path.join(__dirname, "../preload.js"),
             nodeIntegration: false,
             contextIsolation: true,
-            webSecurity: true, // Добавить это
+            webSecurity: true,
+            partition: 'persist:main' // Add this line
         },
         title: `SMP Launcher v${getLauncherVersion()}`,
     });
@@ -1123,11 +1133,19 @@ function createWindow() {
     ipcMain.handle('check-server-status', async (event, host, isHosting = false) => {
         try {
             if (isHosting) {
-                return await checkHostingStatus(CONFIG.SERVERS.HOSTING.HOST);
+                const startTime = performance.now();
+                const result = await checkHostingStatus(host);
+                const endTime = performance.now();
+                const pingTime = Math.round(endTime - startTime);
+                
+                // Отправляем пинг через IPC
+                mainWindow.webContents.send('hosting-ping-update', pingTime);
+                
+                return result;
             } else {
                 const response = await axios.get(
                     `https://api.mcstatus.io/v2/status/java/${CONFIG.SERVERS.GAME.HOST}`,
-                    { timeout: CONFIG.SERVERS.GAME.STATUS_CHECK_INTERVAL }
+                    { timeout: CONFIG.SERVERS.GAME.STATUS_CHECK_TIMEOUT }
                 );
                 return response.data?.online === true;
             }
@@ -1197,25 +1215,34 @@ function createWindow() {
 async function checkHostingStatus(host) {
     try {
         const agent = new https.Agent({
-            rejectUnauthorized: false // Ignore SSL certificate
+            rejectUnauthorized: false,
+            keepAlive: true
         });
 
-        const response = await axios.get(`${CONFIG.SERVERS.HOSTING.URL}`, {
+        const response = await axios.get(CONFIG.SERVERS.HOSTING.URL, {
             httpsAgent: agent,
-            timeout: CONFIG.SERVERS.HOSTING.CHECK_TIMEOUT,
-            validateStatus: function (status) {
-                return true; // Accept any status code
+            timeout: 2000,
+            validateStatus: () => true,
+            headers: {
+                'Connection': 'keep-alive'
             }
         });
-        console.log('Hosting status check response:', response.data);
+
+        // Сервер работает если возвращает 403 (нет авторизации) 
+        // или любой другой ответ кроме 5xx
+        return response.status === 403 || (response.status < 500 && response.status >= 200);
         
-        // Check if response has the expected error message in the error property
-        return response.data && 
-               response.data.error === "The required authorization heads were not present in the request.";
     } catch (error) {
         logger.error('Hosting status check error: %s', error.message);
         return false;
     }
 }
 
-app.whenReady().then(createWindow);app.on("window-all-closed", () => {    if (process.platform !== "darwin") app.quit();});
+app.whenReady().then(() => {
+    initializeCacheDirectories();
+    createWindow();
+});
+
+app.on("window-all-closed", () => {
+    app.quit();
+});

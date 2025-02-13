@@ -596,6 +596,20 @@ input[type="range"]::-webkit-slider-runnable-track {
     display: flex;
     align-items: center;
     gap: 5px;
+    min-width: fit-content;
+    cursor: default;
+}
+
+.server-status.checking {
+    cursor: wait;
+}
+
+.status-text.checking {
+    opacity: 0.7;
+}
+
+.ping-text.checking {
+    opacity: 0.7;
 }
 
 .status-indicator {
@@ -962,6 +976,7 @@ input[type="range"]::-webkit-slider-runnable-track {
 }
 
 .wiki-button {
+    visibility: hidden;
     position: fixed;
     left: 20px;
     bottom: 60px;
@@ -983,4 +998,94 @@ input[type="range"]::-webkit-slider-runnable-track {
 .wiki-button:hover {
     transform: scale(1.1);
     background: var(--accent);
+}
+
+.ping-text {
+    font-size: 11px;
+    margin-left: 5px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: 'Consolas', monospace;
+}
+
+.ping-good {
+    color: #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.ping-medium {
+    color: #FFA726;
+    background: rgba(255, 167, 38, 0.1);
+}
+
+.ping-bad {
+    color: #f44336;
+    background: rgba(244, 67, 54, 0.1);
+}
+
+/* Обновляем стили для footer-item */
+.footer-item .server-status {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    min-width: fit-content;
+}
+
+.version-info-corner {
+    position: fixed;
+    bottom: 40px; /* Отступ от футера */
+    right: 20px;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(5px);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var (--text);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.version-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.version-item .label {
+    color: var(--accent);
+    font-weight: bold;
+}
+
+/* Удалить соответствующие элементы из футера */
+.launcher-footer .footer-item:has(#java-status),
+.launcher-footer .footer-item:has(#version-display) {
+    display: none;
+}
+
+.launch-button {
+    transition: all 0.3s ease;
+    background-color: var(--primary) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    position: relative;
+}
+
+.launch-button.launching {
+    background-color: rgba(74, 78, 105, 0.95) !important;
+    border: 2px solid #FFB74D !important;
+    box-shadow: 0 0 10px rgba(255, 183, 77, 0.3);
+    cursor: wait;
+}
+
+.launch-button.launched {
+    background-color: rgba(74, 78, 105, 0.9) !important;
+    border: 2px solid #66BB6A !important;
+    box-shadow: 0 0 10px rgba(102, 187, 106, 0.3);
+}
+
+.launch-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    border-color: var(--accent);
 }

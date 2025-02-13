@@ -137,6 +137,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     launchGameBtn.addEventListener("click", async () => {
         launchGameBtn.disabled = true;
+        launchGameBtn.classList.add('launching');
         progressArea.innerHTML = "";
 
         const settings = {
@@ -310,6 +311,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Listen for Minecraft status updates
     window.electronAPI.onMinecraftStatusUpdate((status) => {
         minecraftStatus.textContent = status;
+        if (status === "Запущен") {
+            launchGameBtn.classList.remove('launching');
+            launchGameBtn.classList.add('launched');
+        } else {
+            launchGameBtn.classList.remove('launching', 'launched');
+        }
     });
 
     // Add handlers for directory opening buttons
@@ -375,47 +382,84 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Add server status checking
     async function checkServerStatus() {
-        const smpIndicator = document.getElementById('smp-status');
-        const smpText = document.getElementById('smp-status-text');
+        const smpContainer = document.querySelector('.server-status:has(#smp-status)');
+        const sunderContainer = document.querySelector('.server-status:has(#sunder-status)');
+        
+        // Добавляем класс checking перед запросом
+        smpContainer.classList.add('checking');
+        sunderContainer.classList.add('checking');
         
         try {
-            const smpResponse = await window.electronAPI.checkServerStatus(CONFIG.SERVERS.GAME.HOST);
-            console.log('Url:', CONFIG.SERVERS.GAME.HOST);
-            console.log('SMP server status:', smpResponse);
-            if (smpResponse === true) {
-                smpIndicator.className = 'status-indicator online';
-                smpText.textContent = 'Онлайн';
-            } else {
+            // Существующий код проверки...
+            // SMP Planet check
+            const smpIndicator = document.getElementById('smp-status');
+            const smpText = document.getElementById('smp-status-text');
+            const smpPing = document.getElementById('smp-ping');
+            
+            try {
+                const startTime = performance.now();
+                const smpResponse = await window.electronAPI.checkServerStatus(CONFIG.SERVERS.GAME.HOST);
+                const endTime = performance.now();
+                const pingTime = Math.round(endTime - startTime);
+
+                if (smpResponse === true) {
+                    smpIndicator.className = 'status-indicator online';
+                    smpText.textContent = 'Онлайн';
+                    smpPing.textContent = `${pingTime}ms`;
+                    smpPing.className = getPingClass(pingTime);
+                } else {
+                    smpIndicator.className = 'status-indicator offline';
+                    smpText.textContent = 'Оффлайн';
+                    smpPing.textContent = '';
+                    smpPing.className = 'ping-text';
+                }
+            } catch (error) {
                 smpIndicator.className = 'status-indicator offline';
                 smpText.textContent = 'Оффлайн';
+                smpPing.textContent = '';
+                smpPing.className = 'ping-text';
             }
-        } catch (error) {
-            console.error('[Client] Error:', error);
-            smpIndicator.className = 'status-indicator offline';
-            smpText.textContent = 'Оффлайн';
-        }
 
-        const sunderIndicator = document.getElementById('sunder-status');
-        const sunderText = document.getElementById('sunder-status-text');
+            // Sunder Host check
+            const sunderIndicator = document.getElementById('sunder-status');
+            const sunderText = document.getElementById('sunder-status-text');
+            const sunderPing = document.getElementById('sunder-ping');
 
-        try {
-            const sunderResponse = await window.electronAPI.checkServerStatus(CONFIG.SERVERS.HOSTING.HOST, true);
-            if (sunderResponse === true) {
-                sunderIndicator.className = 'status-indicator online';
-                sunderText.textContent = 'Онлайн';
-            } else {
-                sunderIndicator.className = 'status-indicator offline';
+            try {
+                const startTime = performance.now();
+                const sunderResponse = await window.electronAPI.checkServerStatus(CONFIG.SERVERS.HOSTING.HOST, true);
+                const endTime = performance.now();
+                const pingTime = Math.round(endTime - startTime);
+
+                if (sunderResponse === true) {
+                    sunderIndicator.className = 'status-indicator online';
+                    sunderText.textContent = 'Онлайн';
+                    sunderPing.textContent = `${pingTime}ms`;
+                    sunderPing.className = getPingClass(pingTime);
+                } else {
+                    sunderIndicator.className = 'status-indicator offline';
+                    sunderText.textContent = 'Оффлайн';
+                    sunderPing.textContent = '';
+                    sunderPing.className = 'ping-text';
+                }
+            } catch (error) {
+                sunderIndicator.className = 'status-indicator offline';;
                 sunderText.textContent = 'Оффлайн';
+                sunderPing.textContent = '';
+                sunderPing.className = 'ping-text';
             }
-        } catch (error) {
-            sunderIndicator.className = 'status-indicator offline';
-            sunderText.textContent = 'Оффлайн';
+        } finally {
+            // Убираем класс checking после завершения
+            setTimeout(() => {
+                smpContainer.classList.remove('checking');
+                sunderContainer.classList.remove('checking');
+            }, 500);
         }
     }
 
-    // Check status initially and every 30 seconds
+    // Check status initially and every 0 seconds
     checkServerStatus();
-    setInterval(checkServerStatus, CONFIG.SERVERS.GAME.STATUS_CHECK_INTERVAL);
+    setInterval(checkServerStatus, 5000);
 
     const updateModal = document.getElementById('update-modal');
     const updateStatusText = document.getElementById('update-status-text');
@@ -447,7 +491,7 @@ document.addEventListener("DOMContentLoaded", async () => {
                 updateModal.classList.remove('active');
                 break;
 
-            case 'error':
+            case 'error':;
                 updateStatusText.textContent = `Ошибка обновления: ${status.message}`;
                 setTimeout(() => {
                     updateModal.classList.remove('active');
@@ -460,4 +504,91 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.getElementById('open-wiki').addEventListener('click', () => {
         window.electronAPI.openWiki();
     });
+
+    // Проверяем статус ely.by каждые 5 секунд
+    checkElyStatus();
+    setInterval(checkElyStatus, 5000);
 });
+
+async function updateVersionStatus(currentVersion) {
+    const versionIndicator = document.getElementById('version-status-indicator');
+    const versionDisplay = document.getElementById('version-display');
+    
+    try {
+        const versionInfo = await window.electronAPI.checkVersion();
+        
+        if (versionInfo.isLatest) {
+            versionIndicator.className = 'version-status latest';
+            createTooltip(versionDisplay, 'Установлена последняя версия');
+        } else if (versionInfo.isUnofficial) {
+            versionIndicator.className = 'version-status unofficial';
+            createTooltip(versionDisplay, 'Неофициальная версия');
+        } else {
+            versionIndicator.className = 'version-status outdated';
+            createTooltip(versionDisplay, `Доступно обновление: ${versionInfo.latestVersion}`);
+        }
+    } catch (error) {
+        console.error('Version check error:', error);
+    }
+}
+
+function createTooltip(element, text) {
+    const tooltip = document.createElement('div');
+    tooltip.className = 'version-tooltip';
+    tooltip.textContent = text;
+    element.parentElement.appendChild(tooltip);
+}
+
+async function checkElyStatus() {
+    const elyContainer = document.querySelector('.server-status:has(#ely-status)');
+    elyContainer.classList.add('checking');
+    
+    try {
+        // Существующий код проверки...
+        const elyIndicator = document.getElementById('ely-status');
+        const elyText = document.getElementById('ely-status-text');
+        const elyPing = document.getElementById('ely-ping');
+        
+        try {
+            const startTime = performance.now();
+            const response = await fetch('https://authserver.ely.by/auth/validate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ accessToken: 'ping-check' })
+            });
+            const endTime = performance.now();
+            const pingTime = Math.round(endTime - startTime);
+
+            // Даже если ответ 401 - сервер работает
+            if (response.status === 401) {
+                elyIndicator.className = 'status-indicator online';
+                elyText.textContent = 'Онлайн';
+                elyPing.textContent = `${pingTime}ms`;
+                elyPing.className = getPingClass(pingTime);
+            } else {
+                elyIndicator.className = 'status-indicator offline';
+                elyText.textContent = 'Оффлайн';
+                elyPing.textContent = '-1ms';
+                elyPing.className = 'ping-text';
+            }
+        } catch (error) {
+            console.error('Ely.by status check error:', error);
+            elyIndicator.className = 'status-indicator offline';
+            elyText.textContent = 'Ошибка';
+            elyPing.textContent = '-1ms';
+            elyPing.className = 'ping-text';
+        }
+    } finally {
+        setTimeout(() => {
+            elyContainer.classList.remove('checking');
+        }, 500);
+    }
+}
+
+function getPingClass(ping) {
+    if (ping < 100) return 'ping-text ping-good';
+    if (ping < 300) return 'ping-text ping-medium';
+    return 'ping-text ping-bad';
+}

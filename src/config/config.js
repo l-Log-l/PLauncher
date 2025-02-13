@@ -10,20 +10,20 @@ export const CONFIG = {
 
     SERVERS: {
         UPDATE: {
-            HOST: '178.236.253.2',
-            PORT: 25210,
-            URL: 'http://node1.sunder.su:25895',
+            HOST: '192.145.99.60',
+            PORT: 25647,
+            URL: 'http://node4.sunder.su:25647',
             CHECK_INTERVAL: 3600000 // 1 час
         },
         GAME: {
             HOST: 'smp-planet.fun',
-            API: 'http://node1.sunder.su:25895',  // Вернули как было
+            API: 'http://node4.sunder.su:25647',  // Вернули как было
             STATUS_CHECK_INTERVAL: 30000 // 30 секунд
         },
         HOSTING: {
-            HOST: '89.34.219.87',
+            HOST: '192.145.99.60',
             PORT: 8443,
-            URL: 'https://89.34.219.87:8443',
+            URL: 'https://node4.sunder.su:8443',
             WEB: 'sunder.su',
             CHECK_TIMEOUT: 5000
         }

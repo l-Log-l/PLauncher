@@ -10,10 +10,10 @@ export function getLauncherVersion() {
         const packageJson = JSON.parse(
             readFileSync(join(__dirname, '../../package.json'), 'utf8')
         );
-        return packageJson.version || '1.1.2';
+        return packageJson.version || '1.1.5';
     } catch (error) {
         console.error('Error reading version:', error);
-        return '1.1.2'; // Fallback version
+        return '1.1.5'; // Fallback version
     }
 }
 
