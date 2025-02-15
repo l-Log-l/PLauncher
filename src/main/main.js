@@ -874,7 +874,16 @@ function createWindow() {
             launcher = new Client(); // Create a new launcher instance
 
             // Add event handlers after creating the launcher
+            launcher.on("error", (error) => {
+                logger.error('Minecraft launch error: %s', error);
+                mainWindow.webContents.send("minecraft-launch-status", {
+                    error: `Ошибка запуска: ${error.message}`,
+                    stack: error.stack
+                });
+            });
+
             launcher.on("data", (data) => {
+                logger.debug('Minecraft output: %s', data);
                 if (data.includes("Setting user:")) {
                     minecraftProcess = "running";
                     mainWindow.webContents.send("minecraft-status-update", "Запущен");
@@ -1010,8 +1019,13 @@ function createWindow() {
                 "Запуск игры: скачивание и подготовка компонентов"
             );
             
-            await launcher.launch(opts);
+            const result = await launcher.launch(opts);
+            
+            if (!result) {
+                throw new Error("Failed to start Minecraft");
+            }
 
+            logger.info('Launch arguments: %j', opts);
             mainWindow.webContents.send(
                 "minecraft-launch-status",
                 "Игра успешно запущена! Можете закрыть лаунчер."

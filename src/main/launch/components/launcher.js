@@ -202,9 +202,28 @@ class MCLCore extends EventEmitter {
         stdio: this.options.overrides.showConsole ? 'inherit' : 'pipe'
       }
     )
-    minecraft.stdout.on('data', (data) => this.emit('data', data.toString('utf-8')))
-    minecraft.stderr.on('data', (data) => this.emit('data', data.toString('utf-8')))
-    minecraft.on('close', (code) => this.emit('close', (code)))
+
+    if (minecraft.stdout) {
+      minecraft.stdout.on('data', (data) => this.emit('data', data.toString('utf-8')))
+    }
+    
+    if (minecraft.stderr) {
+      minecraft.stderr.on('data', (data) => this.emit('data', data.toString('utf-8')))
+    }
+    
+    minecraft.on('error', (err) => {
+      this.emit('error', err)
+    })
+
+    minecraft.on('close', (code) => {
+      this.emit('close', code)
+    })
+
+    // Проверяем что процесс запущен
+    if (!minecraft.pid) {
+      throw new Error('Failed to start Minecraft process')
+    }
+
     return minecraft
   }
 }
