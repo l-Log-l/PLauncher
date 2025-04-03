@@ -1,0 +1,82 @@
+/* Стили для анимаций загрузки */
+
+.loader {
+  margin: 30px auto;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Анимация CircularSquare */
+.loader--circularSquare {
+  width: 0;
+  height: 0;
+  box-shadow: -0.625em -0.625em 0 0.625em var(--accent),
+              0.625em -0.625em 0 0.625em var(--accent),
+              -0.625em 0.625em 0 0.625em var(--accent),
+              0.625em 0.625em 0 0.625em var(--accent);
+  animation: circSquare 1.5s ease-in-out infinite;
+}
+
+@keyframes circSquare {
+  50% {
+    width: 1.25em;
+    height: 1.25em;
+    border-radius: 50%;
+    transform: rotate(0.5turn);
+    box-shadow: -2.5em 0 0 var(--secondary),
+                2.5em 0 0 var(--primary),
+                0 -2.5em 0 var(--accent),
+                0 2.5em 0 var(--text);
+  }
+  80%, 100% {
+    transform: rotate(1turn);
+  }
+}
+
+/* Дополнительная анимация пульсации для текста */
+.loader-text {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: var(--text);
+  opacity: 0.8;
+  animation: pulse-text 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-text {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Стили для кнопок на странице загрузки - минималистичные */
+.loader-page button {
+  background-color: var(--accent);
+  color: var(--text);
+  padding: 12px 25px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  margin-top: 20px;
+}
+
+.loader-page button:hover {
+  background-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+/* Адаптив для разных размеров экрана */
+@media (max-width: 768px) {
+  .loader--circularSquare {
+    transform: scale(0.8);
+  }
+  
+  .loader-text {
+    font-size: 1em;
+  }
+}

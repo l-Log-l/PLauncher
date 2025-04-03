@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>SMP Launcher</title>
+        <link rel="stylesheet" href="css/styles.css" />
+        <link rel="stylesheet" href="css/waves.css" />
+        <link rel="stylesheet" href="css/pages.css" />
+        <link rel="stylesheet" href="css/loaders.css" />
+        <link rel="stylesheet" href="css/sakura.css" />
+        <link rel="stylesheet" href="css/starwars.css" />
+        <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+        <script src="js/sakura.js"></script>
+        <script src="js/starwars.js"></script>
+        <style>
+            /* Стили для обновления */
+            #update-notification {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background-color: #2a2a42;
+                color: white;
+                padding: 15px;
+                border-radius: 5px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+                z-index: 1000;
+                max-width: 300px;
+                display: none;
+            }
+            
+            #update-notification.show {
+                display: block;
+                animation: slide-in 0.5s forwards;
+            }
+            
+            @keyframes slide-in {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            #update-progress {
+                width: 100%;
+                height: 5px;
+                background-color: #333;
+                margin-top: 10px;
+                border-radius: 3px;
+                overflow: hidden;
+            }
+            
+            #update-progress-bar {
+                height: 100%;
+                background-color: #4CAF50;
+                width: 0;
+                transition: width 0.3s;
+            }
+            
+            .update-buttons {
+                margin-top: 10px;
+                display: flex;
+                justify-content: flex-end;
+            }
+            
+            .update-button {
+                padding: 5px 10px;
+                background-color: #4a4a6a;
+                color: white;
+                border: none;
+                border-radius: 3px;
+                cursor: pointer;
+                margin-left: 10px;
+            }
+            
+            .update-button:hover {
+                background-color: #5a5a7a;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Добавляем контейнер с волнами в начало body -->
+        <div class="waves-container">
+            <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+            viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+                <defs>
+                    <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+                </defs>
+                <g class="parallax">
+                    <use xlink:href="#gentle-wave" x="48" y="0" />
+                    <use xlink:href="#gentle-wave" x="48" y="3" />
+                    <use xlink:href="#gentle-wave" x="48" y="5" />
+                    <use xlink:href="#gentle-wave" x="48" y="7" />
+                </g>
+            </svg>
+        </div>
+        
+        <div class="launcher-container">
+            <div class="wiki-button" id="open-wiki">
+                Вики
+            </div>
+            <!-- Добавляем кнопку для показа Star Wars credits -->
+            <div class="credits-button" id="open-credits">
+                О нас
+            </div>
+            <div class="window-controls">
+                <div class="control minimize" data-action="minimize">—</div>
+                <div class="control maximize" data-action="maximize">□</div>
+                <div class="control close" data-action="close">✕</div>
+            </div>
+            
+            <!-- ЗАГРУЗОЧНАЯ СТРАНИЦА -->
+            <div id="loading-page" class="page active">
+                <div class="loading-content">
+                    <div class="loading-logo">
+                        <h1>SMP Launcher</h1>
+                    </div>
+                    <div class="loader loader--circularSquare"></div>
+                    <div class="loading-progress">
+                        <div class="progress-bar">
+                            <div id="loading-progress-fill" class="progress-fill"></div>
+                        </div>
+                        <div id="loading-status-text" class="loading-status-text">Инициализация...</div>
+                    </div>
+                    <div class="loading-version">
+                        <span id="loading-version-display">Загрузка...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- СТРАНИЦА ВХОДА -->
+            <div id="login-page" class="page">
+                <div class="content-wrapper">
+                    <div class="welcome-section">
+                        <h1 id="welcome-title">SMP Launcher</h1>
+                    </div>
+                    <div class="login-section">
+                        <div class="accounts-list-container">
+                            <h3>Выберите аккаунт</h3>
+                            <div id="accounts-list" class="accounts-list">
+                                <!-- Аккаунты будут добавлены с помощью JavaScript -->
+                            </div>
+                            <button id="add-account-btn" class="add-account-btn">Добавить аккаунт</button>
+                        </div>
+                        <div class="login-form-container">
+                            <div class="setting-group">
+                                <label>Никнейм</label>
+                                <input
+                                    type="text"
+                                    id="username-input"
+                                    placeholder="Введите ваш никнейм ely.by"
+                                />
+                            </div>
+                            <div class="setting-group">
+                                <label>Пароль</label>
+                                <input
+                                    type="password"
+                                    id="password-input"
+                                    placeholder="Введите ваш пароль ely.by"
+                                />
+                            </div>
+                            <div class="remember-account">
+                                <input type="checkbox" id="remember-account" checked />
+                                <label for="remember-account">Запомнить аккаунт</label>
+                            </div>
+                            <!-- Добавляем контейнер для сообщений -->
+                            <div id="message-container" class="message-container"></div>
+                            <div class="login-actions">
+                                <button id="login-button" class="login-button">Войти</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ГЛАВНАЯ СТРАНИЦА -->
+            <div id="main-page" class="page">
+                <div class="content-wrapper">
+                    <div class="welcome-section">
+                        <h1 id="welcome-title-main" style="cursor: pointer; -webkit-app-region: no-drag;">SMP Launcher</h1>
+                        <h3 id="welcome-username">Добро пожаловать, <span id="display-username">Игрок</span>!</h3>
+                    </div>
+                    <div class="main-section">
+                        <div class="main-content">
+                            <div class="server-info">
+                                <div class="server-card">
+                                    <h3>Сервер smp-planet.fun</h3>
+                                    <div class="server-status-display">
+                                        <div class="status-indicator" id="main-smp-status"></div>
+                                        <span class="status-text" id="main-smp-status-text">Проверка...</span>
+                                        <span class="ping-text" id="main-smp-ping"></span>
+                                    </div>
+                                    <div class="online-players" id="online-players">
+                                        Онлайн: <span id="players-count">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="account-controls">
+                                <div class="current-account">
+                                    <div class="account-header">Текущий аккаунт</div>
+                                    <div class="account-display">
+                                        <div class="account-avatar">
+                                            <div class="avatar-letter" id="avatar-letter">?</div>
+                                        </div>
+                                        <div class="account-info">
+                                            <div class="account-name" id="account-name">Не выбран</div>
+                                            <div class="account-server">ely.by</div>
+                                        </div>
+                                    </div>
+                                    <div class="account-buttons">
+                                        <button id="manage-accounts-btn" class="manage-accounts-btn">Управление аккаунтами</button>
+                                        <button id="logout-btn" class="logout-btn">Выйти</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="launch-game" class="launch-button">Запустить игру</button>
+                            <button id="open-settings">Настройки</button>
+                        </div>
+                        <div id="progress-container" class="progress-container">
+                            <div id="progress-area" class="progress-area"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Модальное окно настроек -->
+            <div class="modal-overlay"></div>
+            <div class="modal-group">
+                <!-- Кнопка закрытия будет добавлена через JavaScript -->
+                <div class="setting-group">
+                    <label>Выделенное ОЗУ (МБ)</label>
+                    <div class="ram-selector">
+                        <input
+                            type="range"
+                            id="ram-input"
+                            min="2048"
+                            max="16384"
+                            step="1024"
+                            value="2048"
+                        />
+                        <div class="ram-value">
+                            <span id="ram-display">2048 МБ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Игровая папка</label>
+                    <div class="directory-selector">
+                        <input
+                            type="text"
+                            id="directory-input"
+                            readonly
+                            placeholder="Введите путь до игровой папки"
+                        />
+                        <button id="select-directory">Обзор</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label>Режим отладки</label>
+                    <input type="checkbox" id="debug-input" />
+                </div>
+                <div class="setting-group">
+                    <div class="directory-buttons">
+                        <button id="open-minecraft-dir">Открыть папку Minecraft</button>
+                        <button id="open-launcher-dir">Открыть логи лаунчера</button>
+                    </div>
+                </div>
+                <div class="setting-group-non">
+                    <img src="assets/images/Banner_mini.png" alt="sunder Host" id="banner-img" style="cursor: pointer;" />
+                </div>
+            </div>
+            
+            <!-- Модальное окно управления аккаунтами -->
+            <div class="accounts-modal-overlay"></div>
+            <div class="accounts-modal">
+                <button class="modal-close" id="accounts-modal-close">✕</button>
+                <h2>Управление аккаунтами</h2>
+                <div class="accounts-management-list" id="accounts-management-list">
+                    <!-- Список аккаунтов будет добавлен с помощью JavaScript -->
+                </div>
+                <div class="accounts-actions">
+                    <button id="add-new-account-btn">Добавить новый аккаунт</button>
+                </div>
+            </div>
+            
+            <!-- Add debug sidebar -->
+            <div id="debug-sidebar" class="debug-sidebar">
+                <button class="toggle-button" id="toggle-debug-sidebar">›</button>
+                <div class="debug-header">Debug Info</div>
+                <div class="debug-content">
+                    <div class="debug-section">
+                        <h3>System</h3>
+                        <div class="debug-item">
+                            <span>Java Path:</span>
+                            <span id="debug-java-path">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Game Directory:</span>
+                            <span id="debug-game-dir">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>OS:</span>
+                            <span id="debug-os">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>OS Version:</span>
+                            <span id="debug-os-version">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Architecture:</span>
+                            <span id="debug-os-arch">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Computer Name:</span>
+                            <span id="debug-hostname">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>CPU:</span>
+                            <span id="debug-cpu">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Total RAM:</span>
+                            <span id="debug-total-ram">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Free RAM:</span>
+                            <span id="debug-free-ram">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>Launcher</h3>
+                        <div class="debug-item">
+                            <span>Version:</span>
+                            <span id="debug-launcher-version">Loading...</span>
+                        </div>
+                        <div class="debug-item">
+                            <span>Logs Directory:</span>
+                            <span id="debug-logs-dir">Loading...</span>
+                        </div>
+                    </div>
+                    <div class="debug-section">
+                        <h3>Live Log</h3>
+                        <div id="debug-live-log" class="debug-log"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="version-info-corner">
+                <div class="version-item">
+                    <span class="label">Launcher:</span>
+                    <span id="version-display">Загрузка...</span>
+                </div>
+                <div class="version-item">
+                    <span class="label">Java:</span>
+                    <span id="java-status">Не определено</span>
+                </div>
+            </div>
+            <div class="launcher-footer">
+                <div class="footer-item">
+                    <div class="server-status">
+                        <span class="footer-label">Minecraft:</span>
+                        <div class="status-indicator" id="minecraft-status-indicator"></div>
+                        <span class="status-text" id="minecraft-status">Не запущен</span>
+                    </div>
+                </div>
+                <div class="footer-item">
+                    <div class="server-status">
+                        <span class="footer-label">smp-planet.fun:</span>
+                        <div class="status-indicator" id="smp-status"></div>
+                        <span class="status-text" id="smp-status-text">Проверка...</span>
+                        <span class="ping-text" id="smp-ping"></span>
+                    </div>
+                </div>
+                <div class="footer-item">
+                    <div class="server-status">
+                        <span class="footer-label">ely.by:</span>
+                        <div class="status-indicator" id="ely-status"></div>
+                        <span class="status-text" id="ely-status-text">Проверка...</span>
+                        <span class="ping-text" id="ely-ping"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Add update modal before closing body tag -->
+        <div id="update-modal" class="update-modal">
+            <div class="update-modal-content">
+                <h2>Обновление лаунчера</h2>
+                <p id="update-status-text">Проверка обновлений...</p>
+                <div id="update-progress-bar" class="progress-bar">
+                    <div id="update-progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Добавляем Star Wars Credits модальное окно -->
+        <div id="credits-modal" class="credits-modal">
+            <article class="starwars">
+                <audio preload="auto">
+                    <source src="https://s.cdpn.io/1202/Star_Wars_original_opening_crawl_1977.ogg" type="audio/ogg" />
+                    <source src="https://s.cdpn.io/1202/Star_Wars_original_opening_crawl_1977.mp3" type="audio/mpeg" />
+                </audio>
+                
+                <section class="start">
+                    <p>
+                        Нажмите, чтобы узнать<br><span>о лаунчере</span>
+                    </p>
+                </section>
+                
+                <div class="animation">
+                    <section class="intro">
+                        Давным-давно, в галактике<br>очень, очень далеко...
+                    </section>
+                    
+                    <section class="titles">
+                        <div contenteditable="false" spellcheck="false">  
+                            <p>
+                                Это время создания лаунчера.
+                                Группа разработчиков, работая 
+                                из секретной базы, создала
+                                инновационный интерфейс для
+                                игроков Minecraft сервера SMP.
+                            </p>
+                            <p>
+                                В процессе разработки герои
+                                успешно внедрили различные
+                                функции, делающие запуск
+                                игры максимально удобным
+                                и простым для всех игроков.
+                            </p>
+                            <p>
+                                Эти герои, известные как:
+                                ! Деловая Котейка (@art3m4ik3),
+                                Mr Goat (@maksorr2) и
+                                !Log (@__log__) создали 
+                                лаунчер, который вы сейчас
+                                видите перед собой...
+                            </p>
+                            <p>
+                                и дроид Claude помогал им
+                                в этом процессе.
+                            </p>
+                        </div>
+                    </section>
+                    
+                    <section class="logo">
+                        <div class="smp-planet-logo">SMP Planet</div>
+                    </section>
+                </div>
+            </article>
+            <button class="close-credits-btn">Закрыть</button>
+        </div>
+
+        <!-- Добавляем уведомление об обновлении -->
+        <div id="update-notification">
+            <div id="update-title">Проверка обновлений...</div>
+            <div id="update-message"></div>
+            <div id="update-progress">
+                <div id="update-progress-bar"></div>
+            </div>
+            <div class="update-buttons">
+                <button id="update-later" class="update-button">Позже</button>
+                <button id="update-now" class="update-button">Обновить</button>
+            </div>
+        </div>
+
+        <script src="js/renderer.js"></script>
+        <script src="js/button-movement.js"></script>
+        <script src="js/accounts.js"></script>
+        <script src="js/pages.js"></script>
+        <!-- Добавляем скрипт для Star Wars credits -->
+        <script src="js/starwars.js"></script>
+        <script>
+            // Обработка обновлений
+            const updateNotification = document.getElementById('update-notification');
+            const updateTitle = document.getElementById('update-title');
+            const updateMessage = document.getElementById('update-message');
+            const updateProgressBar = document.getElementById('update-progress-bar');
+            const updateLaterBtn = document.getElementById('update-later');
+            const updateNowBtn = document.getElementById('update-now');
+            
+            window.electronAPI.onUpdateStatus((status) => {
+                console.log('Update status:', status);
+                
+                switch(status.type) {
+                    case 'checking':
+                        updateTitle.textContent = 'Проверка обновлений...';
+                        updateMessage.textContent = '';
+                        updateProgressBar.style.width = '0%';
+                        updateNotification.classList.add('show');
+                        updateLaterBtn.style.display = 'inline-block';
+                        updateNowBtn.style.display = 'none';
+                        break;
+                        
+                    case 'no-update':
+                        updateTitle.textContent = 'Обновления не требуются';
+                        updateMessage.textContent = 'У вас установлена последняя версия.';
+                        setTimeout(() => {
+                            updateNotification.classList.remove('show');
+                        }, 3000);
+                        break;
+                        
+                    case 'update-available':
+                        updateTitle.textContent = 'Доступно обновление!';
+                        updateMessage.textContent = `Доступна новая версия ${status.version}. Хотите обновиться?`;
+                        updateLaterBtn.style.display = 'inline-block';
+                        updateNowBtn.style.display = 'inline-block';
+                        updateNotification.classList.add('show');
+                        break;
+                        
+                    case 'downloading':
+                        updateTitle.textContent = 'Загрузка обновления...';
+                        updateMessage.textContent = `Загружено ${status.progress}%`;
+                        updateProgressBar.style.width = `${status.progress}%`;
+                        updateLaterBtn.style.display = 'none';
+                        updateNowBtn.style.display = 'none';
+                        break;
+                        
+                    case 'installing':
+                        updateTitle.textContent = 'Установка обновления...';
+                        updateMessage.textContent = 'Обновление будет установлено после перезапуска приложения.';
+                        break;
+                        
+                    case 'error':
+                        updateTitle.textContent = 'Ошибка обновления';
+                        updateMessage.textContent = status.message || 'Не удалось загрузить обновление.';
+                        updateLaterBtn.style.display = 'inline-block';
+                        updateNowBtn.style.display = 'none';
+                        break;
+                }
+            });
+            
+            updateLaterBtn.addEventListener('click', () => {
+                updateNotification.classList.remove('show');
+            });
+            
+            updateNowBtn.addEventListener('click', () => {
+                window.electronAPI.checkForUpdates();
+            });
+        </script>
+    </body>
+</html>
