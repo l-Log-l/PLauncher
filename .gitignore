@@ -138,7 +138,6 @@ dist
 # SvelteKit build / generate output
 .svelte-kit
 
-minecraft/
 certificate.pfx
 private.key
 # Dependencies
@@ -169,3 +168,4 @@ Thumbs.db
 *.pem
 *.lockb
 *.json
+*.pyc
